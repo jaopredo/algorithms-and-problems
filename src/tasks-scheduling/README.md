@@ -19,7 +19,7 @@ Desenvolva um algoritmo que encontre o maior subconjunto de tarefas compatíveis
 | Entrada (start, end) | Saída (número máximo de tarefas) | Conjunto escolhido |
 |----------------------|----------------------------------|--------------------|
 | $[(1, 3), (2, 5), (4, 6)]$ | $2$ | $[(1, 3), (4, 6)]$ |
-| $[(7, 9), (0, 10), (4, 5), (8, 9)]$ | $3$ | $[(4, 5), (7, 9), (8, 9)]$ |
+| $[(7, 9), (0, 10), (4, 5), (8, 9)]$ | $2$ | $[(4, 5), (7, 9)]$ |
 | $[(1, 2), (2, 3), (3, 4), (1, 3)]$ | $3$ | $[(1, 2), (2, 3), (3, 4)]$ |
 
 ![Visual Taks Scheduling Example](../../images/task-scheduling.png)
