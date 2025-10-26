@@ -21,9 +21,3 @@ def fractional_knapsack(items: list[tuple[int, int]], W: int) -> float:
             w += item[0]
     
     return backpack
-
-
-items = [(1, 2), (3, 4), (4, 6), (5, 10), (7, 8)]
-W = 9
-resultado = fractional_knapsack(items, W)
-print(resultado)
