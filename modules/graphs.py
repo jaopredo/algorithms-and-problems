@@ -45,6 +45,18 @@ class GraphAdjacencyMatrix:
         self.__adjacency[source][target] = 0
         self.__adjacency[target][source] = 0
     
+    def __iter__(self):
+        return iter(self.__adjacency)
+    
+    def __len__(self):
+        return len(self.__adjacency)
+    
+    def __getitem__(self, idx):
+        if isinstance(idx, tuple):
+            return self.__adjacency[idx[0]][idx[1]]
+        else:
+            return self.__adjacency[idx]
+    
     def print_matrix(self):
         """Shows the matrix's in the terminal
         """
@@ -86,14 +98,16 @@ class GraphAdjacencyList:
             source (int): Source node
             target (int): Target node
         """
-        node = self.__adjacency[source]
+        prev = self.__adjacency[source]
+        node = prev.next
 
-        while node.next:
-            if node.next.value == target:
+        while node:
+            if node.value == target:
                 return
+            prev = node
             node = node.next
         
-        node.next = Node(target)
+        prev.next = Node(target)
     
     def remove_edge(self, source: int, target: int):
         """Removes an edge
@@ -119,3 +133,32 @@ class GraphAdjacencyList:
                 del temp
                 break
             node2 = node2.next
+    
+    def has_edge(self, source: int, target: int):
+        """Checks if a edge exists between two nodes
+
+        Args:
+            source (int): _description_
+            target (target): _description_
+        """
+        node = self.__adjacency[source].next
+        while node:
+            if node.value == target:
+                return True
+            node = node.next
+        
+        node = self.__adjacency[target].next
+        while node:
+            if node.value == source:
+                return True
+            node = node.next
+        return False
+    
+    def __iter__(self):
+        return iter(self.__adjacency)
+    
+    def __len__(self):
+        return len(self.__adjacency)
+    
+    def __getitem__(self, idx):
+        return self.__adjacency[idx]
