@@ -36,4 +36,4 @@ Considere a seguinte tabela de itens e uma capacidade de mochila $W = 11$:
 |:-------:|:----------:|:-----------:|:----------------:|
 | $\{1, 2, 4\}$ | 9 | 29 | Sim |
 | $\{3, 5\}$ | 12 | 46 | Não |
-| **Solução Ótima** | **11** | **37** (Itens: $\{3, 4\}$) | **Sim** |
+| **Solução Ótima** | **11** | **40** (Itens: $\{3, 4\}$) | **Sim** |
