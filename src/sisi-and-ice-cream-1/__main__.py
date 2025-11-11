@@ -1,5 +1,5 @@
 
-def sisi_and_ice_cream(sabores: list[int]) -> int:
+def sisi_and_ice_cream_1(sabores: list[int]) -> int:
     """
     Sisi quer saber qual foi o período mais longo, em dias consecutivos, que
     ela passou sem repetir um único sabor de sorvete.
