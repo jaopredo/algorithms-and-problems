@@ -106,7 +106,10 @@ def problema_2(n: int, k: int, C1: int, C2: int, A: List[int]) -> int:
     Saída:
     - Retorne um único inteiro: o custo mínimo total para reparar toda a estrada.
     """
-    pass
+    total_cost = 0
+
+    def problem2_aux():
+        pass
 
 
 # ==============================================================================
