@@ -84,12 +84,22 @@ class GraphAdjacencyList:
             edges_list (list[int], optional): List containing the nodes wich the node will connect. Defaults to None.
         """
         n = len(self.__adjacency)
-        self.__adjacency.append(Node(n))
+        self.__adjacency.append(None)
 
         if adjacency_list is not None:
-            for i in adjacency_list:
-                self.add_edge(n, i)
-                self.add_edge(i, n)
+            self.__adjacency[n] = Node(adjacency_list[0])
+            for i in range(1,len(adjacency_list)):
+                self.add_edge(n, adjacency_list[i])
+    
+    def get_neighbours(self, v):
+        l = []
+        target = self.__adjacency[v]
+
+        while target is not None:
+            l.append(target.value)
+            target = target.next
+        
+        return l
     
     def add_edge(self, source: int, target: int):
         """Adds an edge
@@ -99,6 +109,10 @@ class GraphAdjacencyList:
             target (int): Target node
         """
         prev = self.__adjacency[source]
+        if prev is None:
+            self.__adjacency[source] = Node(target)
+            return
+
         node = prev.next
 
         while node:

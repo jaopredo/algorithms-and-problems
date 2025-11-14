@@ -1,3 +1,9 @@
+import sys
+import os
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+sys.path.insert(0, ROOT)
+
 from modules.graphs import GraphAdjacencyList, GraphAdjacencyMatrix
 
 def is_subgraph_adjacency_matrix(G: GraphAdjacencyMatrix, H: GraphAdjacencyMatrix):
