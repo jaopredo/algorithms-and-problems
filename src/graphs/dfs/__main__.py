@@ -7,30 +7,37 @@ sys.path.insert(0, ROOT)
 from modules.graphs import GraphAdjacencyList
 
 
-def path_exists(G: GraphAdjacencyList, v1: int, v2: int) -> bool:
-    """Checa a existência de um caminho entre dois vértices
+def dfs(G: GraphAdjacencyList) -> list[int]:
+    """Recebe um grafo G e retorna a lista de visita do pre-order
 
     Args:
-        G (GraphAdjacencyList): Grafo em forma de lista de adjacência
-        v1 (int): Vértice 1
-        v2 (int): Vértice 2
+        G (GraphAdjacencyList): Grafo a ser analisado
 
     Returns:
-        bool: Se existe ou não caminho entre os dois vértices
+        list[int]: Lista de pre-order
     """
     n = len(G)
     visited = [0 for _ in range(n)]
 
+    preorder = [-1 for _ in range(n)]
+    visit = 1
+
     def reach_recursive(v):
+        nonlocal visit
+
         # Se eu ja vizitei o nó atual
         if visited[v]:
             return
         
         v_neighbours = G.get_neighbours(v)
+
         visited[v] = 1
+        preorder[v] = visit
+        visit += 1
         for node in v_neighbours:
             reach_recursive(node)
 
-    reach_recursive(v1)
+    for i in range(n):
+        reach_recursive(i)
 
-    return bool(visited[v2])
+    return preorder
