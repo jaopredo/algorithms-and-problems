@@ -7,6 +7,7 @@ sys.path.insert(0, ROOT)
 from modules.graphs import GraphAdjacencyList
 
 
+# Função DFS feita no problema do DFS
 def dfs(G: GraphAdjacencyList) -> tuple[list[int], list[int]]:
     """Recebe um grafo G e retorna a lista de visita do pre-order
 
@@ -46,3 +47,26 @@ def dfs(G: GraphAdjacencyList) -> tuple[list[int], list[int]]:
         reach_recursive(i)
 
     return preorder, posorder
+
+
+def advance_return_or_crossed(G: GraphAdjacencyList, e: tuple[int, int]) -> str:
+    """Recebe um grafo e uma aresta e a classifica como aresta de retorno,
+
+    Args:
+        G (GraphAdjacencyList): _description_
+        e (tuple[int, int]): _description_
+
+    Returns:
+        str: _description_
+    """
+    preorder, postorder = dfs(G)
+
+    vi = e[0]
+    vj = e[1]
+
+    if preorder[vi] < preorder[vj] and postorder[vj] < postorder[vi]:
+        return 'advance'
+    elif preorder[vi] > preorder[vj] and postorder[vj] > postorder[vi]:
+        return 'return'
+    else:
+        return 'crossed'

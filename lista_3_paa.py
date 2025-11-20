@@ -106,10 +106,73 @@ def problema_2(n: int, k: int, C1: int, C2: int, A: List[int]) -> int:
     Saída:
     - Retorne um único inteiro: o custo mínimo total para reparar toda a estrada.
     """
-    total_cost = 0
+    def bisect_left(a, x):
+        lo, hi = 0, len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if a[mid] < x:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
 
-    def problem2_aux():
-        pass
+    def bisect_right(a, x):
+        lo, hi = 0, len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if a[mid] <= x:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
+
+    holes = sorted(A.copy())
+    costs = [C2 for _ in range(k)]
+
+    def compare_costs(b1, b2, i):
+        left_b1_value = b1*2**i
+        right_b1_value = (b1+1)*2**i - 1
+        left_b2_value = b2*2**i
+        right_b2_value = (b2+1)*2**i - 1
+
+        N1 = bisect_right(A, right_b1_value) - bisect_left(A, left_b1_value)
+        N2 = bisect_right(A, right_b2_value) - bisect_left(A, left_b2_value)
+
+        l1 = l2 = 2**i
+
+        l = bisect_left(A, b1)
+        j = bisect_left(A, b2)
+
+        min_cost_l1 = costs[l]
+        min_cost_l2 = costs[j]
+        # total_holes = N1+N2
+        if N1 > 0 and N2 > 0:
+            return min_cost_l1 + min_cost_l2
+        else:
+            if N1 == 0 and N2 > 0:
+                return min(N2 * (l1 + l2) * C2, min_cost_l1+min_cost_l2)
+            elif N2 == 0 and N1 > 0:
+                return min(N1 * (l1 + l2) * C2, min_cost_l1+min_cost_l2)
+            else:
+                return C1
+
+    def problema_2_aux(HBI: list[int], i: int) -> list[int]:
+        for box in HBI:
+            if box%2 == 1:
+                cost = compare_costs(box, box-1, i)
+            else:
+                cost = compare_costs(box, box+1, i)
+            costs[box] = cost
+        
+        for l in range(len(HBI)):
+            HBI[l] //= 2
+    
+    for i in range(n):
+        print(holes)
+        print(costs)
+        holes = problema_2_aux(holes, i)
+    
+    return costs[0]
 
 
 # ==============================================================================
@@ -229,3 +292,23 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
       estado 1 ao estado $n$.
     """
     pass
+
+
+if __name__ == '__main__':
+    n = 2
+    k = 2
+    C1 = 1
+    C2 = 2
+    A = [1, 3]
+
+    print(problema_2(n,k,C1,C2,A))
+
+    print()
+
+    n = 3
+    k = 2
+    C1 = 1
+    C2 = 2
+    A = [1, 7]
+
+    print(problema_2(n,k,C1,C2,A))

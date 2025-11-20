@@ -25,4 +25,3 @@ O objetivo é verificar se essa condição é **verdadeira para todas as arestas
 | $\{(0,1),(1,2),(2,3)\}$ | $[0\!\mapsto\!1,\ 1\!\mapsto\!2,\ 2\!\mapsto\!3,\ 3\!\mapsto\!4]$ | Sim |
 | $\{(0,2),(2,1)\}$ | $[0\!\mapsto\!1,\ 1\!\mapsto\!2,\ 2\!\mapsto\!3]$ | Não |
 | $\{(1,3),(0,2),(2,3)\}$ | $[0\!\mapsto\!1,\ 1\!\mapsto\!3,\ 2\!\mapsto\!2,\ 3\!\mapsto\!4]$ | Sim |
-| $\{(0,1),(
