@@ -5,37 +5,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")
 sys.path.insert(0, ROOT)
 
 from modules.graphs import GraphAdjacencyList
-
-
-class Node:
-    def __init__(self, v):
-        self.value = v
-        self.next = None
-
-
-class Queue:
-    def __init__(self):
-        self.first_node = None
-        self.last_node = None
-    
-    def enqueue(self, v):
-        if self.last_node:
-            self.last_node.next = Node(v)
-            self.last_node = self.last_node.next
-        else:
-            self.first_node = Node(v)
-            self.last_node = self.first_node
-    
-    def dequeue(self):
-        if self.first_node:
-            v = self.first_node.value
-            self.first_node = self.first_node.next
-            return v
-        else:
-            raise IndexError("Fila vazia")
-    
-    def is_empty(self):
-        return self.first_node is None
+from modules.structures import Queue
 
 
 def bfs(G: GraphAdjacencyList) -> list[int]:
@@ -54,9 +24,9 @@ def bfs(G: GraphAdjacencyList) -> list[int]:
     counter = 0
 
     def apply_bfs(init_actual):
-        nonlocal counter
+        nonlocal counter, n
         actual = init_actual
-        queue = Queue()
+        queue = Queue(n)
         queue.enqueue(actual)
         order[actual] = counter
 
