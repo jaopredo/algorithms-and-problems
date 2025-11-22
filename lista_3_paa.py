@@ -106,46 +106,50 @@ def problema_2(n: int, k: int, C1: int, C2: int, A: List[int]) -> int:
     Saída:
     - Retorne um único inteiro: o custo mínimo total para reparar toda a estrada.
     """
-    def bisect_left(a, x):
-        lo, hi = 0, len(a)
-        while lo < hi:
+    def binary_search(a, x):
+        lo, hi = 0, len(a) - 1
+        while lo <= hi:
             mid = (lo + hi) // 2
-            if a[mid] < x:
+            if a[mid] == x:
+                return mid
+            elif a[mid] < x:
                 lo = mid + 1
             else:
-                hi = mid
-        return lo
+                hi = mid - 1
+        return -1
 
-    def bisect_right(a, x):
-        lo, hi = 0, len(a)
-        while lo < hi:
-            mid = (lo + hi) // 2
-            if a[mid] <= x:
-                lo = mid + 1
-            else:
-                hi = mid
-        return lo
-
-    holes = sorted(A.copy())
+    # Lista onde o i-ésimo item indica o índice que a caixa está localizada
+    # dentro da lista de tamanho 2^n (0, 2^n-1) representando a estrada. No início, eu sei
+    # que cada buraco vai estar localizado na caixinha da sua própria posição
+    # global
+    boxes = [a - 1 for a in sorted(A.copy())]
+    # Lista onde o i-ésimo elemento tem o número de buracos na caixa i
+    holes = [1 for _ in range(k)]
+    # Lista contendo os custos da caixa onde cada buraco está localizado, ou seja,
+    # se holes[i] = x, então costs[i] vai ser o melhor custo obtido ao tomar as
+    # decisões corretas na caixinha x
     costs = [C2 for _ in range(k)]
 
-    def compare_costs(b1, b2, i):
-        left_b1_value = b1*2**i
-        right_b1_value = (b1+1)*2**i - 1
-        left_b2_value = b2*2**i
-        right_b2_value = (b2+1)*2**i - 1
-
-        N1 = bisect_right(A, right_b1_value) - bisect_left(A, left_b1_value)
-        N2 = bisect_right(A, right_b2_value) - bisect_left(A, left_b2_value)
+    def compare_costs(b1, b2, i, b1_idx):
+        N1 = holes[b1_idx]
+        b2_idx = binary_search(boxes, b2)
+        if b2_idx == -1:
+            N2 = 0
+        else:
+            N2 = holes[b2_idx]
 
         l1 = l2 = 2**i
 
-        l = bisect_left(A, b1)
-        j = bisect_left(A, b2)
+        j = binary_search(boxes, b2)
 
-        min_cost_l1 = costs[l]
-        min_cost_l2 = costs[j]
-        # total_holes = N1+N2
+        min_cost_l1 = costs[b1_idx]
+        if b2_idx == -1:
+            min_cost_l2 = C1
+        else:
+            min_cost_l2 = costs[j]
+        
+        holes[b1_idx] = N1+N2
+
         if N1 > 0 and N2 > 0:
             return min_cost_l1 + min_cost_l2
         else:
@@ -156,21 +160,30 @@ def problema_2(n: int, k: int, C1: int, C2: int, A: List[int]) -> int:
             else:
                 return C1
 
-    def problema_2_aux(HBI: list[int], i: int) -> list[int]:
-        for box in HBI:
-            if box%2 == 1:
-                cost = compare_costs(box, box-1, i)
-            else:
-                cost = compare_costs(box, box+1, i)
-            costs[box] = cost
-        
-        for l in range(len(HBI)):
-            HBI[l] //= 2
+    def aux(B, i):
+        """Atualiza a lista de buracos e de custos
+
+        Args:
+            H (list[int]): Lista de buracos
+            i (int): Iteração atual
+        """
+        for l, box in enumerate(B):  # Vou percorrer cada caixa e seu índice
+            if box%2 == 0:  # Se ele for par, então ela ta na esquerda da caixinha
+                l_or_r = 1  # Então eu vou comparar ela e a da direita
+            else:  # Se não
+                l_or_r = -1  # Eu vou comparar ela e a da esquerda
+            # Eu pego o melhor custo entre ela e a caixa que ela vai se unir
+            # pra formar a nova caixinha
+            cost = compare_costs(box, box+l_or_r, i, l)
+            # Seto esse novo custo
+            costs[l] = cost
+
+        for j in range(k):
+            B[j]//=2
     
-    for i in range(n):
-        print(holes)
-        print(costs)
-        holes = problema_2_aux(holes, i)
+    for i in range(n):  # Eu só vou fazer n iterações já que seria log_2(2^n)=n
+        # Vou atualizar a lista dos buracos
+        aux(boxes, i)
     
     return costs[0]
 
@@ -190,7 +203,24 @@ def problema_3(n: int, A: List[int]) -> int:
     Saída:
     - A quantidade total de subsequências radicais, módulo $999999937$.
     """
-    pass
+    # IMPLEMENTAÇÃO LENTA PRIMEIRO
+
+    # O i-ésimo elemento dessa lista representa a quantidade de elementos de
+    # A que são divisíveis por i
+    L = [1, *(0 for i in range(n))]
+
+    def find_divisors(k):
+        divisors = []
+        for i in range(1, int(k**0.5)+1):  # O(sqrt(n))
+            if k % i == 0:
+                if i <= n and k//i <= n and i != k//i:
+                    divisors.append(i)
+                    divisors.append(k//i)
+        return divisors
+
+    for element in A:
+        valid_positions = find_divisors(element)  # O(sqrt(n))
+
 
 
 # ==============================================================================
@@ -295,20 +325,7 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
 
 
 if __name__ == '__main__':
-    n = 2
-    k = 2
-    C1 = 1
-    C2 = 2
-    A = [1, 3]
+    pass
 
-    print(problema_2(n,k,C1,C2,A))
-
-    print()
-
-    n = 3
-    k = 2
-    C1 = 1
-    C2 = 2
-    A = [1, 7]
-
-    print(problema_2(n,k,C1,C2,A))
+    # A = [1,2,2]
+    # print(problema_3(len(A), A))
