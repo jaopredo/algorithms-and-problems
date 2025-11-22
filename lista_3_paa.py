@@ -239,7 +239,190 @@ def problema_4(n: int) -> List[List[int]]:
     - Retorna uma matriz $A$, onde $A[i][j]$ é o número mínimo de
       movimentos para um cavalo ir da posição (i, j) para a posição (0, 0).
     """
-    pass
+    class Node:
+        def __init__(self, value):
+            self.value = value
+            self.next: Node = None
+    class GraphAdjacencyList:
+        """Class for representing graphs
+        """
+        def __init__(self):
+            # Matriz de adjacência
+            self.__adjacency: list[Node] = []
+        
+        def add_node(self, adjacency_list: list[int] = None):
+            """Appends a node into the graph along with its edges (If specified)
+
+            Args:
+                edges_list (list[int], optional): List containing the nodes wich the node will connect. Defaults to None.
+            """
+            n = len(self.__adjacency)
+            self.__adjacency.append(None)
+
+            if adjacency_list is not None:
+                self.__adjacency[n] = Node(adjacency_list[0])
+                for i in range(1,len(adjacency_list)):
+                    self.add_edge(n, adjacency_list[i])
+        
+        def get_neighbours(self, v):
+            l = []
+            target = self.__adjacency[v]
+
+            while target is not None:
+                l.append(target.value)
+                target = target.next
+            
+            return l
+        
+        def add_edge(self, source: int, target: int):
+            """Adds an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            prev = self.__adjacency[source]
+            if prev is None:
+                self.__adjacency[source] = Node(target)
+                return
+
+            node = prev.next
+
+            while node:
+                if node.value == target:
+                    return
+                prev = node
+                node = node.next
+            
+            prev.next = Node(target)
+        
+        def remove_edge(self, source: int, target: int):
+            """Removes an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            node1 = self.__adjacency[source]
+            node2 = self.__adjacency[target]
+
+            while node1.next:
+                if node1.next.value == target:
+                    temp = node1.next
+                    node1.next = temp.next
+                    del temp
+                    break
+                node1 = node1.next
+            while node2.next:
+                if node2.next.value == source:
+                    temp = node2.next
+                    node2.next = temp.next
+                    del temp
+                    break
+                node2 = node2.next
+        
+        def has_edge(self, source: int, target: int):
+            """Checks if a edge exists between two nodes
+
+            Args:
+                source (int): _description_
+                target (target): _description_
+            """
+            node = self.__adjacency[source].next
+            while node:
+                if node.value == target:
+                    return True
+                node = node.next
+            
+            node = self.__adjacency[target].next
+            while node:
+                if node.value == source:
+                    return True
+                node = node.next
+            return False
+        
+        def __iter__(self):
+            return iter(self.__adjacency)
+        
+        def __len__(self):
+            return len(self.__adjacency)
+        
+        def __getitem__(self, idx):
+            return self.__adjacency[idx]
+
+    # Crio o grafo que vai representar o tabuleiro
+    G = GraphAdjacencyList()
+
+    possible_moves = [
+        (1, 2), (2,1), (2, -1), (1, -2),
+        (-1, -2), (-2, -1), (-2, 1), (-1, 2)
+    ]
+
+    # Adiciono todos os meus vértices
+    for _ in range(n**2):
+        G.add_node()
+    
+    for i in range(n):
+        for j in range(n):
+            # Pego a numeração do vértice
+            v = i * n + j
+
+            # Vou analisar cada deslocamento possivel
+            for di, dj in possible_moves:
+                # Pego as coordenadas no tabuleiro
+                ni, nj = i + di, j + dj
+
+                # Só adiciono se estiver dentro do tabuleiro
+                if 0 <= ni < n and 0 <= nj < n:
+                    u = ni * n + nj
+                    G.add_edge(v, u)
+    
+    def bfs_path(G: GraphAdjacencyList, v: int) -> list[int]:
+        """Recebe um grafo G e retorna a lista de visita no BFS
+
+        Args:
+            G (GraphAdjacencyList): Grafo a ser analisado
+            v (int): Vértice que será analisado a distância relativa a todos
+            os outros vértices
+
+        Returns:
+            list[int]: Lista de distâncias onde list[i] é a distância de
+            i para v
+        """
+        n = len(G)
+
+        if n == 0:
+            raise ValueError("Você passou um grafo vazio")
+
+        distances = [-1 for _ in range(n)]
+        distances[v] = 0
+
+        def apply_bfs(init_actual):
+            actual = init_actual
+            queue = deque()
+            queue.append(actual)
+
+            while queue:
+                actual = queue.popleft()
+                neighbours = G.get_neighbours(actual)
+
+                for node in neighbours:
+                    if distances[node] == -1:
+                        distances[node] = distances[actual]+1
+                        queue.append(node)
+                    else:
+                        distances[node] = min(distances[node], distances[actual]+1)
+        
+        # Só checo para v
+        apply_bfs(v)
+        
+        return distances
+
+    distances = bfs_path(G, 0)
+
+    table = [distances[i*n:(i+1)*n] for i in range(n)]
+
+    return table
 
 
 # ==============================================================================
@@ -325,7 +508,9 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
 
 
 if __name__ == '__main__':
-    pass
-
     # A = [1,2,2]
     # print(problema_3(len(A), A))
+
+    table = problema_4(8)
+    for line in table:
+        print(line)
