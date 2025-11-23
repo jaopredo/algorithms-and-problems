@@ -507,9 +507,6 @@ def problema_7(n: int, m: int, estradas: List[Tuple[int, int, int]]) -> int:
                 self.parent[ry] = rx
                 self.rank[rx] += 1
 
-    # Lista com as arestas que geram a árvore minimal
-    tree_edges = []
-
     edges = []
 
     for s, t, w in estradas:
@@ -555,10 +552,165 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
     - Retorne um único inteiro: o número de formas distintas de ir do
       estado 1 ao estado $n$.
     """
-    pass
+    class Node:
+        def __init__(self, value):
+            self.value = value
+            self.next: Node = None
+    class GraphAdjacencyList:
+        """Class for representing graphs
+        """
+        def __init__(self):
+            # Matriz de adjacência
+            self.__adjacency: list[Node] = []
+        
+        def add_node(self, adjacency_list: list[int] = None):
+            """Appends a node into the graph along with its edges (If specified)
+
+            Args:
+                edges_list (list[int], optional): List containing the nodes wich the node will connect. Defaults to None.
+            """
+            n = len(self.__adjacency)
+            self.__adjacency.append(None)
+
+            if adjacency_list is not None:
+                self.__adjacency[n] = Node(adjacency_list[0])
+                for i in range(1,len(adjacency_list)):
+                    self.add_edge(n, adjacency_list[i])
+        
+        def get_neighbours(self, v):
+            l = []
+            target = self.__adjacency[v]
+
+            while target is not None:
+                l.append(target.value)
+                target = target.next
+            
+            return l
+        
+        def add_edge(self, source: int, target: int):
+            """Adds an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            prev = self.__adjacency[source]
+            if prev is None:
+                self.__adjacency[source] = Node(target)
+                return
+
+            node = prev.next
+
+            while node:
+                if node.value == target:
+                    return
+                prev = node
+                node = node.next
+            
+            prev.next = Node(target)
+        
+        def remove_edge(self, source: int, target: int):
+            """Removes an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            node1 = self.__adjacency[source]
+            node2 = self.__adjacency[target]
+
+            while node1.next:
+                if node1.next.value == target:
+                    temp = node1.next
+                    node1.next = temp.next
+                    del temp
+                    break
+                node1 = node1.next
+            while node2.next:
+                if node2.next.value == source:
+                    temp = node2.next
+                    node2.next = temp.next
+                    del temp
+                    break
+                node2 = node2.next
+        
+        def has_edge(self, source: int, target: int):
+            """Checks if a edge exists between two nodes
+
+            Args:
+                source (int): _description_
+                target (target): _description_
+            """
+            node = self.__adjacency[source].next
+            while node:
+                if node.value == target:
+                    return True
+                node = node.next
+            
+            node = self.__adjacency[target].next
+            while node:
+                if node.value == source:
+                    return True
+                node = node.next
+            return False
+        
+        def __iter__(self):
+            return iter(self.__adjacency)
+        
+        def __len__(self):
+            return len(self.__adjacency)
+        
+        def __getitem__(self, idx):
+            return self.__adjacency[idx]
+
+    G = GraphAdjacencyList()
+
+    # Montando o grafo
+    for _ in range(n):
+        G.add_node()
+    
+    # Adicionando as arestas
+    for source, target in transicoes:
+        G.add_edge(source-1, target-1)
+    
+    # Vetor onde o i-pesimo elemento é a quantidade
+    # de caminhos até o vértice n-1 saindo do vértice i
+    paths = [-1 for _ in range(n)]
+    paths[n-1]=1
+
+
+    def reach_recursive(v):
+        # Se eu ja tenho as informações das distâncias a partir do nó atual
+        # eu simplesmente retorno essas informações
+        if paths[v] != -1:
+            return paths[v]
+        # do contrário:
+
+        # Pego os vizinhos do nó
+        v_neighbours = G.get_neighbours(v)
+
+        # Quantidade de caminhos possíveis até o nó n-1
+        # a partir do nó v passado
+        total = 0
+        
+        # E vou fazer o mesmo processo em cada um até checar em 
+        for node in v_neighbours:
+            total += reach_recursive(node)
+        
+        paths[v] = total
+
+        return total 
+
+
+    reach_recursive(0)
+
+    print(paths)
+
+    return paths[0]
 
 
 if __name__ == '__main__':
     # A = [1,2,2]
     # print(problema_3(len(A), A))
-    pass
+    n = 5; m = 7; A = [(1, 3), (3, 4), (1, 2), (2, 5), (1, 4), (4, 5), (3, 5)]
+    print(problema_8(n, m, A))
