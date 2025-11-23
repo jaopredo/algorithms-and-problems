@@ -63,19 +63,19 @@ class GraphAdjacencyMatrix:
         for line in self.__adjacency:
             print(line)
 
-
 class Node:
-    def __init__(self, value):
+    def __init__(self, value, weight):
         self.value = value
         self.next: Node = None
-
+        self.weight = weight
 
 class GraphAdjacencyList:
     """Class for representing graphs
     """
-    def __init__(self):
+    def __init__(self, weighted = False):
         # Matriz de adjacência
         self.__adjacency: list[Node] = []
+        self.weighted = weighted
     
     def add_node(self, adjacency_list: list[int] = None):
         """Appends a node into the graph along with its edges (If specified)
@@ -96,12 +96,15 @@ class GraphAdjacencyList:
         target = self.__adjacency[v]
 
         while target is not None:
-            l.append(target.value)
+            if self.weighted:
+                l.append((target.value, target.weight))
+            else:
+                l.append(target.value)
             target = target.next
         
         return l
     
-    def add_edge(self, source: int, target: int):
+    def add_edge(self, source: int, target: int, weight: float = 1):
         """Adds an edge
 
         Args:
@@ -110,7 +113,7 @@ class GraphAdjacencyList:
         """
         prev = self.__adjacency[source]
         if prev is None:
-            self.__adjacency[source] = Node(target)
+            self.__adjacency[source] = Node(target, weight)
             return
 
         node = prev.next
@@ -121,7 +124,7 @@ class GraphAdjacencyList:
             prev = node
             node = node.next
         
-        prev.next = Node(target)
+        prev.next = Node(target, weight)
     
     def remove_edge(self, source: int, target: int):
         """Removes an edge

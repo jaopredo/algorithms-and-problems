@@ -461,7 +461,178 @@ def problema_6(n: int, m: int, rotas: List[Tuple[int, int, int]]) -> int:
     Saída:
     - Retorne o menor custo total possível para a viagem.
     """
-    pass
+    class Node:
+        def __init__(self, value, weight):
+            self.value = value
+            self.next: Node = None
+            self.weight = weight
+    class GraphAdjacencyList:
+        """Class for representing graphs
+        """
+        def __init__(self):
+            # Matriz de adjacência
+            self.__adjacency: list[Node] = []
+        
+        def add_node(self, adjacency_list: list[int] = None):
+            """Appends a node into the graph along with its edges (If specified)
+
+            Args:
+                edges_list (list[int], optional): List containing the nodes wich the node will connect. Defaults to None.
+            """
+            n = len(self.__adjacency)
+            self.__adjacency.append(None)
+
+            if adjacency_list is not None:
+                self.__adjacency[n] = Node(adjacency_list[0])
+                for i in range(1,len(adjacency_list)):
+                    self.add_edge(n, adjacency_list[i])
+        
+        def get_neighbours(self, v):
+            l = []
+            target = self.__adjacency[v]
+
+            while target is not None:
+                l.append((target.value, target.weight))
+                target = target.next
+            
+            return l
+        
+        def add_edge(self, source: int, target: int, weight: float):
+            """Adds an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            prev = self.__adjacency[source]
+            if prev is None:
+                self.__adjacency[source] = Node(target, weight)
+                return
+
+            node = prev.next
+
+            while node:
+                if node.value == target:
+                    return
+                prev = node
+                node = node.next
+            
+            prev.next = Node(target, weight)
+        
+        def remove_edge(self, source: int, target: int):
+            """Removes an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            node1 = self.__adjacency[source]
+            node2 = self.__adjacency[target]
+
+            while node1.next:
+                if node1.next.value == target:
+                    temp = node1.next
+                    node1.next = temp.next
+                    del temp
+                    break
+                node1 = node1.next
+            while node2.next:
+                if node2.next.value == source:
+                    temp = node2.next
+                    node2.next = temp.next
+                    del temp
+                    break
+                node2 = node2.next
+        
+        def has_edge(self, source: int, target: int):
+            """Checks if a edge exists between two nodes
+
+            Args:
+                source (int): _description_
+                target (target): _description_
+            """
+            node = self.__adjacency[source].next
+            while node:
+                if node.value == target:
+                    return True
+                node = node.next
+            
+            node = self.__adjacency[target].next
+            while node:
+                if node.value == source:
+                    return True
+                node = node.next
+            return False
+        
+        def __iter__(self):
+            return iter(self.__adjacency)
+        
+        def __len__(self):
+            return len(self.__adjacency)
+        
+        def __getitem__(self, idx):
+            return self.__adjacency[idx]
+
+    v = 0
+
+    G = GraphAdjacencyList()
+    for _ in range(n):
+        G.add_node()
+    for c1, c2, w in rotas:
+        G.add_edge(c1-1, c2-1, w)
+        G.add_edge(c2-1, c1-1, w)
+
+    distances_without = [float('inf') for _ in range(n)]
+    distances_with = [float('inf') for _ in range(n)]
+
+    distances_with[v] = 0
+    distances_without[v] = 0
+
+    visited_with = [False for _ in range(n)]
+    visited_without = [False for _ in range(n)]
+    
+    # Eu tenho um heap que armazena a estimativa para o nó da segunda posição
+    # e a terceira indica se aquela estimativa é já com um cupom aplicado ou
+    # sem nenhum cupom aplicado (0 para não tem cupom aplicado e 1 para que
+    # tem cumpom aplicado)
+    heap = [(0, v, 0)]
+
+    while heap:
+        dist, node, has_cupom = heapq.heappop(heap)
+
+        if has_cupom and visited_with[node]:
+            continue
+        if not has_cupom and visited_without[node]:
+            continue
+
+        if has_cupom:
+            visited_with[node] = True
+        else:
+            visited_without[node] = True
+
+        for neigh, w in G.get_neighbours(node):
+            if not has_cupom:
+                # Aplico o desconto na aresta atual
+                new_dist_with_cupom = dist + int(w/2)
+                # Não aplico o desconto na aresta
+                new_dist_without_cupom = dist + w
+
+                if new_dist_with_cupom < distances_with[neigh]:
+                    distances_with[neigh] = new_dist_with_cupom
+                    heapq.heappush(heap, (distances_with[neigh], neigh, 1))
+                if new_dist_without_cupom < distances_without[neigh]:
+                    distances_without[neigh] = new_dist_without_cupom
+                    heapq.heappush(heap, (distances_without[neigh], neigh, 0))
+            else:
+                # Aplico o desconto sem cupom pois estou lidando com
+                # uma estimativa com cupom
+                new_dist_without_cupom = dist + w
+
+                if new_dist_without_cupom < distances_with[neigh]:
+                    distances_with[neigh] = new_dist_without_cupom
+                    heapq.heappush(heap, (distances_with[neigh], neigh, 1))
+
+    return distances_with[-1]
 
 
 # ==============================================================================
@@ -712,5 +883,6 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
 if __name__ == '__main__':
     # A = [1,2,2]
     # print(problema_3(len(A), A))
-    n = 5; m = 7; A = [(1, 3), (3, 4), (1, 2), (2, 5), (1, 4), (4, 5), (3, 5)]
-    print(problema_8(n, m, A))
+    n = 3; m = 3; A = [(1, 2, 3), (2, 3, 1), (1, 3, 7)]
+
+    print(problema_6(n, m, A))
