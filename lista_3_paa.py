@@ -440,7 +440,249 @@ def problema_5(n: int, m: int, grid: List[List[str]]) -> int:
     Saída:
     - Retorne o menor tempo para escapar. Se não for possível, retorne -1.
     """
-    pass
+    class Node:
+        def __init__(self, value):
+            self.value = value
+            self.next: Node = None
+    class GraphAdjacencyList:
+        """Class for representing graphs
+        """
+        def __init__(self):
+            # Matriz de adjacência
+            self.__adjacency: list[Node] = []
+        
+        def add_node(self, adjacency_list: list[int] = None):
+            """Appends a node into the graph along with its edges (If specified)
+
+            Args:
+                edges_list (list[int], optional): List containing the nodes wich the node will connect. Defaults to None.
+            """
+            n = len(self.__adjacency)
+            self.__adjacency.append(None)
+
+            if adjacency_list is not None:
+                self.__adjacency[n] = Node(adjacency_list[0])
+                for i in range(1,len(adjacency_list)):
+                    self.add_edge(n, adjacency_list[i])
+        
+        def get_neighbours(self, v):
+            l = []
+            target = self.__adjacency[v]
+
+            while target is not None:
+                l.append(target.value)
+                target = target.next
+            
+            return l
+        
+        def add_edge(self, source: int, target: int):
+            """Adds an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            prev = self.__adjacency[source]
+            if prev is None:
+                self.__adjacency[source] = Node(target)
+                return
+
+            node = prev.next
+
+            while node:
+                if node.value == target:
+                    return
+                prev = node
+                node = node.next
+            
+            prev.next = Node(target)
+        
+        def remove_edge(self, source: int, target: int):
+            """Removes an edge
+
+            Args:
+                source (int): Source node
+                target (int): Target node
+            """
+            node1 = self.__adjacency[source]
+            node2 = self.__adjacency[target]
+
+            while node1.next:
+                if node1.next.value == target:
+                    temp = node1.next
+                    node1.next = temp.next
+                    del temp
+                    break
+                node1 = node1.next
+            while node2.next:
+                if node2.next.value == source:
+                    temp = node2.next
+                    node2.next = temp.next
+                    del temp
+                    break
+                node2 = node2.next
+        
+        def has_edge(self, source: int, target: int):
+            """Checks if a edge exists between two nodes
+
+            Args:
+                source (int): _description_
+                target (target): _description_
+            """
+            node = self.__adjacency[source].next
+            while node:
+                if node.value == target:
+                    return True
+                node = node.next
+            
+            node = self.__adjacency[target].next
+            while node:
+                if node.value == source:
+                    return True
+                node = node.next
+            return False
+        
+        def __iter__(self):
+            return iter(self.__adjacency)
+        
+        def __len__(self):
+            return len(self.__adjacency)
+        
+        def __getitem__(self, idx):
+            return self.__adjacency[idx]
+
+    # Crio o grafo que vai representar o tabuleiro
+    G = GraphAdjacencyList()
+
+    possible_moves = [
+        (1,0), (-1,0), (0,-1), (0,1)
+    ]
+
+    # Adiciono todos os meus vértices
+    for _ in range(n*m):
+        G.add_node()
+    
+    water_positions = []
+    initial_position = (None, None)
+    exit_positions = []
+    
+    for i in range(n):
+        for j in range(m):
+            # Pego a numeração do vértice
+            v = i * m + j
+
+            if grid[i][j] == 'A':
+                water_positions.append((i,j))
+            elif grid[i][j] == 'V':
+                initial_position = (i, j)
+            elif (i == n-1 or i == 0 or j == m-1 or j == 0) and grid[i][j]=='.':
+                exit_positions.append((i,j))
+
+            # Vou analisar cada deslocamento possivel
+            for di, dj in possible_moves:
+                # Pego as coordenadas no tabuleiro
+                ni, nj = i + di, j + dj
+
+                # Só adiciono se estiver dentro do tabuleiro
+                if 0 <= ni < n and 0 <= nj < m and grid[ni][nj] != '#':
+                    u = ni * m + nj
+                    G.add_edge(v, u)
+    
+    def water_bfs(G: GraphAdjacencyList) -> list[int]:
+        nonlocal water_positions
+        """Recebe um grafo G e retorna a lista de visita no BFS
+
+        Args:
+            G (GraphAdjacencyList): Grafo a ser analisado
+            v (int): Vértice que será analisado a distância relativa a todos
+            os outros vértices
+
+        Returns:
+            list[int]: Lista de distâncias onde list[i] é a distância de
+            i para v
+        """
+        if n == 0:
+            raise ValueError("Você passou um grafo vazio")
+
+        distances = [-1 for _ in range(m*n)]
+        for i,j in water_positions:
+            distances[i*m+j] = 0
+
+        def apply_bfs():
+            queue = deque()
+            for i, j in water_positions:
+                queue.append(i*m + j)
+            actual = None
+
+            while queue:
+                actual = queue.popleft()
+                neighbours = G.get_neighbours(actual)
+
+                for node in neighbours:
+                    if distances[node] == -1:
+                        distances[node] = distances[actual]+1
+                        queue.append(node)
+                    else:
+                        distances[node] = min(distances[node], distances[actual]+1)
+        
+        # Só checo para v
+        apply_bfs()
+        
+        return distances
+
+    def bfs_path(G: GraphAdjacencyList, v: int) -> list[int]:
+        """Recebe um grafo G e retorna a lista de visita no BFS
+
+        Args:
+            G (GraphAdjacencyList): Grafo a ser analisado
+            v (int): Vértice que será analisado a distância relativa a todos
+            os outros vértices
+
+        Returns:
+            list[int]: Lista de distâncias onde list[i] é a distância de
+            i para v
+        """
+        if n == 0:
+            raise ValueError("Você passou um grafo vazio")
+
+        distances = [-1 for _ in range(m*n)]
+        distances[v] = 0
+
+        def apply_bfs(init_actual):
+            actual = init_actual
+            queue = deque()
+            queue.append(actual)
+
+            while queue:
+                actual = queue.popleft()
+                neighbours = G.get_neighbours(actual)
+
+                for node in neighbours:
+                    if distances[node] == -1:
+                        distances[node] = distances[actual]+1
+                        queue.append(node)
+                    else:
+                        distances[node] = min(distances[node], distances[actual]+1)
+        
+        # Só checo para v
+        apply_bfs(v)
+        
+        return distances
+
+    water_table = water_bfs(G)
+    min_water_time_arrivals = [water_table[i*m+j] for i, j in exit_positions]
+    
+    player_table = bfs_path(G, initial_position[0]*m+initial_position[1])
+    min_player_time_arrivals = [player_table[i*m+j] for i, j in exit_positions]
+
+    compatible_times = []
+
+    for i in range(len(min_player_time_arrivals)):
+        if min_player_time_arrivals[i] < min_water_time_arrivals[i]:
+            compatible_times.append(min_player_time_arrivals[i])
+    
+    return min(compatible_times) if len(compatible_times) > 0 else -1
+
 
 
 # ==============================================================================
@@ -883,6 +1125,14 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
 if __name__ == '__main__':
     # A = [1,2,2]
     # print(problema_3(len(A), A))
-    n = 3; m = 3; A = [(1, 2, 3), (2, 3, 1), (1, 3, 7)]
+    n = 5
+    m = 8
+    grid = [
+        ['#', '#', '#', '#', '#', '#', '#', '#'],
+        ['#', 'A', '.', '.', 'V', '.', '.', '#'],
+        ['#', '.', '#', '.', 'A', '#', '.', '#'],
+        ['#', 'A', '#', '.', '.', '#', '.', '.'],
+        ['#', '.', '#', '#', '#', '#', '#', '#'],
+    ]
 
-    print(problema_6(n, m, A))
+    print(problema_5(n, m, grid))
