@@ -482,7 +482,58 @@ def problema_7(n: int, m: int, estradas: List[Tuple[int, int, int]]) -> int:
     Saída:
     - Retorne o custo mínimo total para conectar todas as $n$ cidades.
     """
-    pass
+    class UnionFind:
+        def __init__(self, n):
+            self.parent = list(range(n))
+            self.rank = [0] * n
+
+        def find(self, x):
+            if self.parent[x] != x:
+                self.parent[x] = self.find(self.parent[x])
+            return self.parent[x]
+
+        def union(self, x, y):
+            rx = self.find(x)
+            ry = self.find(y)
+
+            if rx == ry:
+                return
+
+            if self.rank[rx] < self.rank[ry]:
+                self.parent[rx] = ry
+            elif self.rank[rx] > self.rank[ry]:
+                self.parent[ry] = rx
+            else:
+                self.parent[ry] = rx
+                self.rank[rx] += 1
+
+    # Lista com as arestas que geram a árvore minimal
+    tree_edges = []
+
+    edges = []
+
+    for s, t, w in estradas:
+        edges.append((w, s-1, t-1))
+    
+    edges.sort(key=lambda info: info[0])
+    
+    components = UnionFind(n)
+
+    total = 0
+    added = 0
+
+    for w, source, target in edges:
+        if added == n-1:
+            break
+        source_component = components.find(source)
+        target_component = components.find(target)
+
+        if source_component != target_component:
+            total += w
+            added += 1
+            components.union(source, target)
+
+    return total
 
 
 # ==============================================================================
@@ -510,7 +561,4 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
 if __name__ == '__main__':
     # A = [1,2,2]
     # print(problema_3(len(A), A))
-
-    table = problema_4(8)
-    for line in table:
-        print(line)
+    pass
