@@ -203,23 +203,32 @@ def problema_3(n: int, A: List[int]) -> int:
     Saída:
     - A quantidade total de subsequências radicais, módulo $999999937$.
     """
-    # IMPLEMENTAÇÃO LENTA PRIMEIRO
+    MOD = 999999937
 
-    # O i-ésimo elemento dessa lista representa a quantidade de elementos de
-    # A que são divisíveis por i
-    L = [1, *(0 for i in range(n))]
+    def divisores(num: int):
+        divs_low = []
+        divs_high = []
 
-    def find_divisors(k):
-        divisors = []
-        for i in range(1, int(k**0.5)+1):  # O(sqrt(n))
-            if k % i == 0:
-                if i <= n and k//i <= n and i != k//i:
-                    divisors.append(i)
-                    divisors.append(k//i)
-        return divisors
+        r = int(num**.5)
+        for i in range(1, r + 1):
+            if num % i == 0 and i <= n:
+                divs_low.append(i)
 
-    for element in A:
-        valid_positions = find_divisors(element)  # O(sqrt(n))
+                if i != num // i and num//i <= n:
+                    divs_high.append(num // i)
+        return divs_high + divs_low
+    
+    D = [0 for _ in range(n+1)]
+    D[0] = 1
+
+    for a in A:
+        divs = divisores(a)
+        for k in divs:
+            D[k] = D[k] + D[k-1]
+    
+    total_radical_subsequences = sum(D) - 1
+
+    return total_radical_subsequences % MOD
 
 
 
@@ -1120,19 +1129,3 @@ def problema_8(n: int, m: int, transicoes: List[Tuple[int, int]]) -> int:
     print(paths)
 
     return paths[0]
-
-
-if __name__ == '__main__':
-    # A = [1,2,2]
-    # print(problema_3(len(A), A))
-    n = 5
-    m = 8
-    grid = [
-        ['#', '#', '#', '#', '#', '#', '#', '#'],
-        ['#', 'A', '.', '.', 'V', '.', '.', '#'],
-        ['#', '.', '#', '.', 'A', '#', '.', '#'],
-        ['#', 'A', '#', '.', '.', '#', '.', '.'],
-        ['#', '.', '#', '#', '#', '#', '#', '#'],
-    ]
-
-    print(problema_5(n, m, grid))
