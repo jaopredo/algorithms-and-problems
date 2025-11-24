@@ -204,6 +204,9 @@ def problema_3(n: int, A: List[int]) -> int:
     - A quantidade total de subsequências radicais, módulo $999999937$.
     """
     MOD = 999999937
+    
+    D = [0 for _ in range(n+1)]
+    D[0] = 1
 
     def divisores(num: int):
         divs_low = []
@@ -217,9 +220,6 @@ def problema_3(n: int, A: List[int]) -> int:
                 if i != num // i and num//i <= n:
                     divs_high.append(num // i)
         return divs_high + divs_low
-    
-    D = [0 for _ in range(n+1)]
-    D[0] = 1
 
     for a in A:
         divs = divisores(a)
